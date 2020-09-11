@@ -30,7 +30,7 @@
         clipped-left
     >
       <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
-      <v-toolbar-title>Application</v-toolbar-title>
+      <v-toolbar-title>TEST Vuetify + Firebase Application</v-toolbar-title>
     </v-app-bar>
 
     <v-main>
@@ -38,26 +38,36 @@
           class="fill-height"
           fluid
       >
-        <v-row
-            align="center"
-            justify="center"
-        >
-          <v-col class="shrink">
-            <v-tooltip right>
-              <template v-slot:activator="{ on }">
-                <v-btn
-                    :href="source"
-                    icon
-                    large
-                    target="_blank"
-                    v-on="on"
-                >
-                  <v-icon large>mdi-code-tags</v-icon>
-                </v-btn>
-              </template>
-              <span>Source</span>
-            </v-tooltip>
+        <v-row>
+          <v-col :style="{display: 'flex'}">
+            <div>
+              <input
+                  type="text"
+                  v-model="addData"
+                  :style="{ backgroundColor: 'white'}"
+                  placeholder="plz enter string"
+              />
+            </div>
+            <div>
+              <button
+                  @click="clickButton"
+                  :style="{
+                    marginLeft: '10px',
+                    backgroundColor: 'white',
+                    color: 'black'
+                  }"
+              >foo</button>
+            </div>
           </v-col>
+        </v-row>
+        <v-row>
+          <ul>
+            <li
+                v-for="item in firebaseData"
+                :key="item"
+            >{{ item }}
+            </li>
+          </ul>
         </v-row>
       </v-container>
     </v-main>
@@ -69,17 +79,42 @@
 </template>
 
 <script>
+import * as firebase from 'firebase';
+
 export default {
   props: {
     source: String,
   },
 
-  data: () => ({
+  data: ()=>({
     drawer: null,
+    firebaseData: [],
+    addData: ''
   }),
 
-  created () {
-    this.$vuetify.theme.dark = true
+  created() {
+    this.$vuetify.theme.dark = true;
+
+    firebase.database().ref('test').on('child_added', this.childAdded);
   },
-}
+
+  methods: {
+    clickButton() {
+      console.log('this.addData: ', this.addData);
+      if (!this.addData) {
+        return;
+      }
+
+      firebase.database().ref('test').push({
+        test: 'foo',
+        data: this.addData,
+      });
+    },
+    childAdded(snap) {
+      console.log('childAdded: ', snap.val());
+      console.log('this.firebaseData: ', this.firebaseData);
+      this.firebaseData.push(snap.val().data);
+    }
+  }
+};
 </script>
