@@ -12,6 +12,7 @@
     "core-js": "^3.6.5",
     "firebase": "^7.20.0",
     "vue": "^2.6.11",
+    "vue-tweet-embed": "^2.4.0",
     "vuetify": "^2.3.10"
   },
   "devDependencies": {

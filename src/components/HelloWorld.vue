@@ -14,12 +14,12 @@
             <v-list-item-title>Youtube</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
-        <v-list-item link @click="clickLinkSidenav('settings')">
+        <v-list-item link @click="clickLinkSidenav('twitter')">
           <v-list-item-action>
             <v-icon>mdi-cog</v-icon>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title>Settings</v-list-item-title>
+            <v-list-item-title>Twitter</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
       </v-list>
@@ -84,10 +84,19 @@
           </ul>
         </v-row>
       </v-container>
-      <v-container v-if="page === 'settings'">
-        <div>
-          foo
-        </div>
+      <v-container v-if="page === 'twitter'">
+        <v-row>
+          <v-col v-for="id in twitterIds" :key="id">
+            <Timeline
+                :id="id"
+                :source-type="'profile'"
+                :options="{
+                  theme: 'dark',
+                  tweetLimit: '3'
+                }"
+            ></Timeline>
+          </v-col>
+        </v-row>
       </v-container>
     </v-main>
 
@@ -97,12 +106,17 @@
   </v-app>
 </template>
 
+
 <script>
 import * as firebase from 'firebase';
+import { Timeline } from 'vue-tweet-embed';
 
 export default {
   props: {
     source: String,
+  },
+  components: {
+    Timeline,
   },
 
   data: ()=>({
@@ -110,13 +124,14 @@ export default {
     firebaseData: [],
     newYoutubeVideoId: '',
     page: 'top',
-    youtubeVideoIds: []
+    youtubeVideoIds: [],
+    twitterIds: ['DiveDesk', 'ecotours2015', 'thailand_divers', 'scubadivergear']
   }),
 
   created() {
     this.$vuetify.theme.dark = true;
 
-    firebase.database().ref('scuba').on('child_added', this.childAddedScuba)
+    firebase.database().ref('scuba').on('child_added', this.childAddedScuba);
   },
 
   methods: {
@@ -129,7 +144,7 @@ export default {
         videoId: this.newYoutubeVideoId,
       });
 
-      this.newYoutubeVideoId = ''
+      this.newYoutubeVideoId = '';
     },
     childAddedScuba(snap) {
       this.youtubeVideoIds.push(snap.val().videoId);
