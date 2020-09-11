@@ -6,15 +6,15 @@
         clipped
     >
       <v-list dense>
-        <v-list-item link>
+        <v-list-item link @click="clickLinkSidenav('top')">
           <v-list-item-action>
             <v-icon>mdi-view-dashboard</v-icon>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title>Dashboard</v-list-item-title>
+            <v-list-item-title>Youtube</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
-        <v-list-item link>
+        <v-list-item link @click="clickLinkSidenav('settings')">
           <v-list-item-action>
             <v-icon>mdi-cog</v-icon>
           </v-list-item-action>
@@ -35,28 +35,42 @@
 
     <v-main>
       <v-container
+          v-if="page === 'top'"
           class="fill-height"
           fluid
       >
+        <v-row>
+          <v-col v-for="id in youtubeVideoIds" :key="id">
+            <iframe width="560" height="315" v-bind:src="`https://www.youtube.com/embed/${id}`" frameborder="0"
+                    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen></iframe>
+          </v-col>
+        </v-row>
         <v-row>
           <v-col :style="{display: 'flex'}">
             <div>
               <input
                   type="text"
-                  v-model="addData"
-                  :style="{ backgroundColor: 'white'}"
-                  placeholder="plz enter string"
+                  v-model="newYoutubeVideoId"
+                  :style="{
+                    backgroundColor: 'white',
+                    width: '300px'
+                  }"
+                  placeholder="plz enter youtube video id"
               />
             </div>
             <div>
               <button
-                  @click="clickButton"
+                  @click="clickAddYoutubeVideoIdButton('scuba')"
                   :style="{
                     marginLeft: '10px',
                     backgroundColor: 'white',
-                    color: 'black'
+                    color: 'black',
+                    padding: '0 2px',
+                    width: '100px'
                   }"
-              >foo</button>
+              >Add
+              </button>
             </div>
           </v-col>
         </v-row>
@@ -69,6 +83,11 @@
             </li>
           </ul>
         </v-row>
+      </v-container>
+      <v-container v-if="page === 'settings'">
+        <div>
+          foo
+        </div>
       </v-container>
     </v-main>
 
@@ -89,31 +108,34 @@ export default {
   data: ()=>({
     drawer: null,
     firebaseData: [],
-    addData: ''
+    newYoutubeVideoId: '',
+    page: 'top',
+    youtubeVideoIds: []
   }),
 
   created() {
     this.$vuetify.theme.dark = true;
 
-    firebase.database().ref('test').on('child_added', this.childAdded);
+    firebase.database().ref('scuba').on('child_added', this.childAddedScuba)
   },
 
   methods: {
-    clickButton() {
-      console.log('this.addData: ', this.addData);
-      if (!this.addData) {
+    clickAddYoutubeVideoIdButton(label) {
+      if (!this.newYoutubeVideoId) {
         return;
       }
 
-      firebase.database().ref('test').push({
-        test: 'foo',
-        data: this.addData,
+      firebase.database().ref(label).push({
+        videoId: this.newYoutubeVideoId,
       });
+
+      this.newYoutubeVideoId = ''
     },
-    childAdded(snap) {
-      console.log('childAdded: ', snap.val());
-      console.log('this.firebaseData: ', this.firebaseData);
-      this.firebaseData.push(snap.val().data);
+    childAddedScuba(snap) {
+      this.youtubeVideoIds.push(snap.val().videoId);
+    },
+    clickLinkSidenav(page) {
+      this.page = page;
     }
   }
 };
